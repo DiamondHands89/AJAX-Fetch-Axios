@@ -1,5 +1,6 @@
 import * as Carousel from "./Carousel.js";
-import axios from "axios";
+// You have axios already
+console.log(axios);
 
 // The breed selection input element.
 const breedSelect = document.getElementById("breedSelect");
@@ -21,6 +22,30 @@ const API_KEY = "";
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
+
+
+async function initialLoad() {
+  try {
+    const res = await fetch('https://api.thecatapi.com/v1/breeds');
+    const data = await res.json();
+    
+
+    // Create option tags
+    
+    for (const breed of data) {
+      const option = document.createElement('option');
+      option.setAttribute("value", breed.id)
+      option.textContent = breed.name
+      breedSelect.append(option);
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+initialLoad();
+
+
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
