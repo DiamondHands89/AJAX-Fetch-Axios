@@ -12,7 +12,7 @@ const progressBar = document.getElementById("progressBar");
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "";
+const API_KEY = "live_diaM13C7Q27f5u3JpSeoEvLxd3IZHyJY5U73McmQxVojO5rAQahmjsU6TiVjwZxT";
 
 /**
  * 1. Create an async function "initialLoad" that does the following:
@@ -38,8 +38,12 @@ async function initialLoad() {
       option.textContent = breed.name
       breedSelect.append(option);
     }
+
+    if (data.length > 0) {
+      await loadBreedInfo(data[0].id);
+    }
   } catch (err) {
-    console.log(err)
+    console.error(err)
   }
 }
 
@@ -67,7 +71,51 @@ breedSelect.addEventListener('change', async (event) => {
   await loadBreedInfo(breedId);
 });
 
+async function loadBreedInfo(breedId) {
+  try {
+    // Clear carousel and infoDump
+    Carousel.clear();
+    infoDump.innerHTML = '';
 
+    // Fethc selected breed info
+    const res = await fetch('https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}&limit=5', {
+      headers: {
+        'x-api-key': 'live_diaM13C7Q27f5u3JpSeoEvLxd3IZHyJY5U73McmQxVojO5rAQahmjsU6TiVjwZxT',
+      }
+    })
+    const data = await res.json();
+
+    // Create new carousel elements for each object in the respone array
+    for (const item of data) {
+      if(item.breeds && item.breeds.length > 0) {
+        const imgElement = document.createElement('img');
+        imgElement.src = item.url;
+        imgElement.alt = item.breeds[0].name;
+        Carousel.append(imgElement);
+      }
+    }
+
+    // Create an information section inside infoDump
+    if (data.length > 0 && data[0].breeds && data[0].breeds.length > 0) {
+      const breedInfo = data[0].breeds[0];
+      const infoElement = document.createElement('div');
+      infoElement.innerHTML = `
+        <h2>${breedInfo.name}</h2> 
+        <p>${breedInfo.description}</p> 
+        <p><strong>Temperament:</strong> ${breedInfo.temperament}</p> 
+        <p><strong>Origin:</strong> ${breedInfo.origin}</p> 
+        <p><strong>Life Span:</strong> ${breedInfo.life_span} years</p> 
+        <p><strong>Wikipedia URL:</strong> <a href="${breedInfo.wikipedia_url}" target="_blank">More Info</a></p>
+      `;
+      infoDump.appendChild(infoElement);
+    }
+
+    // Restart Carousel
+    Carousel.init;
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 
 
